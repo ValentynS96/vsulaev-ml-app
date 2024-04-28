@@ -20,4 +20,7 @@ class TxtDistanceRequest(BaseModel):
     text_2: StrictStr = Field(..., title="text_2", description="Друге слово", example="leviamur")
 
 class TxtDistanceResponse(BaseModel):
-    result: Union[int, float] = Field(..., title="result", description="Результат обчислення", example=1)
+    similarity: Union[int, float] = Field(..., title="result", description="Результат обчислення", example=1)
+    alg: AlgNameEnum = Field(default=AlgNameEnum.STRCMP95, title="algorithm_name", description="Назва алгоритму за яким буде проведено порівняння")
+    text_1: StrictStr = Field(..., title="text_1", description="Перше слово", example="leviathan")
+    text_2: StrictStr = Field(..., title="text_2", description="Друге слово", example="leviamur")
