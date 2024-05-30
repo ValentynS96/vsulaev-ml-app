@@ -4,6 +4,7 @@ from app.api.api import api_router
 from app.api.heartbeat import heartbeat_router
 from app.api.txt_distance import txt_distance_router
 from app.api.clasfier import clasfier_router
+from app.api.sentences import sentences_router
 
 from app.core.config import settings
 from app.core.event_handler import start_app_handler, stop_app_handler
@@ -15,6 +16,7 @@ app.include_router(api_router, prefix=settings.API_V1_STR, tags=["ML API"])
 
 app.include_router(txt_distance_router, prefix=settings.API_V1_STR, tags=["NLP HM API"])
 app.include_router(clasfier_router, prefix=settings.API_V1_STR, tags=["NLP HM API"])
+app.include_router(sentences_router, prefix=settings.API_V1_STR, tags=["NLP Topic API"])
 
 
 app.add_event_handler("startup", start_app_handler(app, settings.MODEL_PATH))
