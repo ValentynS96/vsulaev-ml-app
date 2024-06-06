@@ -3,6 +3,7 @@ from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer, WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
+
 # Завантаження даних для nltk
 import ssl
 try:
@@ -16,8 +17,27 @@ nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
 
+def preprocess_text_spacy(doc, options):
+    tokens = doc
 
-def preprocess_text(text, options):
+    # Видалення стоп-слів
+    if 'use_stopwords' in options:
+        tokens = [token for token in tokens if not token.is_stop]
+
+    if 'use_numbers' in options:
+        tokens = [
+            token for token in tokens if not (token.like_num or token.is_currency)
+        ]
+
+    # Лематизація
+    if 'use_lemmatize' in options:
+        text = " ".join([token.lemma_ for token in tokens])
+    else:
+        text = " ".join([token.text for token in tokens])
+
+    return text
+
+def preprocess_text_nltk(text, options):
     # Токенізація
     if 'use_tokenize' in options:
         tokens = word_tokenize(text)

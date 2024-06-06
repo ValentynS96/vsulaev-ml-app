@@ -1,8 +1,9 @@
-from fastapi import APIRouter
+import spacy
+from fastapi import APIRouter, HTTPException
 from typing import Any
 
-from app.models.pipeline import PipelineReq
-from app.services.preprocessing import preprocess_text
+from app.models.pipeline import PipelineReq, PreprocessorType
+from app.services.preprocessing import preprocess_text_nltk, preprocess_text_spacy
 
 import pickle
 import os
@@ -18,6 +19,13 @@ def load_models(name):
     with open(filepath, 'rb') as model:
         return pickle.load(model)
 
+loadModels = {
+    "KNearest_Neighbors": load_models("KNearest_Neighbors"),
+    "Logistic_Regression": load_models("Logistic_Regression"),
+    "Naive_Bayes": load_models("Naive_Bayes"),
+    "Support_Vector_Classifier": load_models("Support_Vector_Classifier"),
+    "Spacy": spacy.load("en_core_web_sm")
+}
 
 def find_features(words):
     features = {}
@@ -31,12 +39,17 @@ def find_features(words):
 async def clasfier(req: PipelineReq) -> Any:
     model = None
 
-    if req.models in models:
-        model = models[req.models]
-    else:
-        model = load_models(req.models)
-        models[req.models] = model
+    if req.preprocessor == PreprocessorType.SPACY:
+        model = loadModels["Spacy"]
+        doc = model(req.input)
+        print(preprocess_text_spacy(doc, req.options))
+        return preprocess_text_spacy(doc, req.options)
 
-    input_text = preprocess_text(req.input, req.options)
-    print(model.classify_many(find_features(input_text)))
-    return model.classify_many(find_features(input_text))
+    elif req.preprocessor == PreprocessorType.NLTK:
+        model = loadModels[req.models]
+        input_text = preprocess_text_nltk(req.input, req.options)
+        return model.classify_many(find_features(input_text))
+    else:
+        raise HTTPException(status_code=400, detail="Preprocessor type invalid")
+
+
